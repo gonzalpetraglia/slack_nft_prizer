@@ -1,7 +1,12 @@
 {
-  "name": "nextjs",
-  "version": "0.1.0",
-  "private": true,
+  "name": "slack_nft_minter",
+  "version": "1.0.0",
+  "description": "A slack bot intended to give informal prizes to students in the form of an NFT",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gonzalpetraglia/slack-nft-minter.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -11,5 +16,15 @@
     "next": "10.x",
     "react": "17.x",
     "react-dom": "17.x"
-  }
+  },
+  "keywords": [
+    "nft"
+  ],
+  "author": "Gonzalo L Petraglia",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gonzalpetraglia/slack-nft-minter/issues"
+  },
+  "homepage": "https://github.com/gonzalpetraglia/slack-nft-minter#readme"
+
 }
