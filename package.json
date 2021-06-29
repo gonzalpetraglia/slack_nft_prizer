@@ -10,9 +10,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "deploy-kovan": "hardhat deploy --network kovan",
+    "deploy-local": "hardhat deploy --network hardhat",
+    "release": "standard-version"
   },
   "dependencies": {
+    "axios": "0.21.1",
     "next": "10.x",
     "react": "17.x",
     "react-dom": "17.x"
@@ -25,6 +29,13 @@
   "bugs": {
     "url": "https://github.com/gonzalpetraglia/slack-nft-minter/issues"
   },
-  "homepage": "https://github.com/gonzalpetraglia/slack-nft-minter#readme"
-
+  "homepage": "https://github.com/gonzalpetraglia/slack-nft-minter#readme",
+  "devDependencies": {
+    "@openzeppelin/contracts": "4.1.0",
+    "dotenv": "10.0.0",
+    "ethers": "5.4.0",
+    "hardhat": "2.4.1",
+    "hardhat-deploy": "0.8.9",
+    "sha3": "2.1.4"
+  }
 }
