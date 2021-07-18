@@ -11,11 +11,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "deploy-kovan": "hardhat deploy --network kovan",
+    "deploy-rinkeby": "hardhat deploy --network rinkeby",
     "deploy-local": "hardhat deploy --network hardhat",
     "release": "standard-version"
   },
   "dependencies": {
+    "@pinata/sdk": "1.1.23",
     "axios": "0.21.1",
     "next": "10.x",
     "react": "17.x",
@@ -31,6 +32,7 @@
   },
   "homepage": "https://github.com/gonzalpetraglia/slack-nft-minter#readme",
   "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@openzeppelin/contracts": "4.1.0",
     "dotenv": "10.0.0",
     "ethers": "5.4.0",

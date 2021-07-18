@@ -8,24 +8,22 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Prizes is ERC721, Ownable {
 
-    string private baseURI;
+    mapping(uint256 => string) public postfix;
 
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */
-    constructor (string memory name_, string memory symbol_) ERC721(name_, symbol_) Ownable(){
+    constructor (string memory name_, string memory symbol_) ERC721(name_, symbol_) Ownable() {
     }
 
-    function safeMint(address to, uint256 tokenId) public onlyOwner {
+    function safeMint(address to, uint256 tokenId, string memory ipfsCID) public onlyOwner {
         _safeMint(to, tokenId, "");
+        postfix[tokenId] = ipfsCID;
     }
 
 
-    function _baseURI() internal view override returns(string memory) {
-        return baseURI;
-    }
-
-    function setBaseURI(string calldata newBaseURI) public onlyOwner {
-        baseURI = newBaseURI;
+    function tokenURI(uint256 tokenId) public override view returns(string memory){
+        require(_exists(tokenId), "token not exists");
+        return string(abi.encodePacked("ipfs://", postfix[tokenId]));
     }
 }

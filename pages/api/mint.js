@@ -1,22 +1,29 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 const ethers = require('ethers');
-const { Keccak } = require('sha3');
-const axios = require('axios');
 
+const { mint721 } = require('../../services/blockchain');
+const { getImageData, pinMetadata} = require('../../services/ipfs');
+
+
+const { address: contractAddress, abi: contractAbi} = require(`../../deployments/${process.env.NETWORK}/Prizes.json`)
 const config = {
-  network: process.env.NETWORK,
-  mnemonic: process.env.MNEMONIC,
-  infuraProjectId: process.env.INFURA_PROJECT_ID,
-  slackToken: process.env.SLACK_TOKEN,
-  teamDomain: process.env.TEAM_DOMAIN,
-  authorizedUserIds: process.env.AUTHORIZED_IDS.split(',')
+  slack: {
+    token: process.env.SLACK_TOKEN,
+    teamDomain: process.env.TEAM_DOMAIN,
+    authorizedUserIds: process.env.AUTHORIZED_IDS.split(','),
+  },
+  blockchain: {
+    network: process.env.NETWORK,
+    mnemonic: process.env.MNEMONIC,
+    infuraProjectId: process.env.INFURA_PROJECT_ID,
+    contractAddress,
+    contractAbi
+  },
+  ipfs: {
+    key: process.env.KEY,
+    secret: process.env.SECRET
+  }
 };
 
-const { address: contractAddress, abi: contractAbi} = require(`../../deployments/${config.network}/Prizes.json`)
-
-const getContract = (config, wallet) => {
-  return new ethers.Contract(contractAddress, contractAbi, wallet);
-};
 const checkUser = (authorizedUserIds, actualUserId) => {
   if(!authorizedUserIds.includes(actualUserId))
     throw "user not autorized";
@@ -39,33 +46,41 @@ const checkCommand = (expectedCommand, actualCommand) => {
 
 export default async (req, res) => {
   try {
-    checkDomain(config.teamDomain, req.body.team_domain);
-    checkUser(config.authorizedUserIds, req.body.user_id);
-    checkToken(config.slackToken, req.body.token);
+    checkDomain(config.slack.teamDomain, req.body.team_domain);
+    checkUser(config.slack.authorizedUserIds, req.body.user_id);
+    checkToken(config.slack.token, req.body.token);
     checkCommand('/mint', req.body.command);
-
-    const provider = new ethers.providers.InfuraProvider(config.network, config.infuraProjectId);
-    const wallet = ethers.Wallet.fromMnemonic(config.mnemonic).connect(provider);
-    const erc721 = await getContract(config, wallet);
+    
     const parameters = req.body.text.split(' ');
-
-    const hashAlgorithm = new Keccak(256);
+    
+    const imageData = await getImageData(config.ipfs, '1c2021');
+    const subject = 'Taller de Programación 2';
+    const university = 'FIUBA';
     const address = parameters[0];
-
+    const name = parameters[1];
+    const semester = parameters[2];
+    const id = parameters[3];
+    const amount = parameters[4];
     const metadata = {
-      prizeName: parameters[1],
-      semester: parameters[2],
-      id: parameters[3],
-      amount: parameters[4],
-      subject: 'Taller de Programacion 2',
-      university: 'FIUBA'
+      name: parameters[1],
+      description: `A prize given in ${university}'s ${subject}. Prize ${id} out of ${amount} of this type`,
+      semester,
+      image: imageData.url,
+      attributes: {
+        subject: 'Taller de Programacion 2',
+        university: 'FIUBA',
+        id,
+        amount
+      }
     };
-    const metadataString = JSON.stringify(metadata);
-    hashAlgorithm.update(metadataString);
-    const id = '0x' + hashAlgorithm.digest().toString('hex');
 
-    const tx = await erc721.safeMint(address, id, { gasLimit: 100_000 });
-    const message = `Minting a token with data: ${metadataString}. \n\n Tx can be seen in: https://${config.network}.etherscan.io/tx/${tx.hash}`;
+    const ipfsHash = await pinMetadata(config.ipfs, metadata, `${name}-${semester}-${id}`);
+
+    const hash = Buffer.from(ethers.utils.base58.decode(ipfsHash)).toString('hex').slice(4);
+    
+    const tx = await mint721(config.blockchain, address, hash, ipfsHash);
+
+    const message = `Minting a token with data: ${JSON.stringify(metadata)} and hash: ${hash}. \n\n Tx can be seen in: https://${config.blockchain.network}.etherscan.io/tx/${tx.hash}`;
     res.statusCode = 200;
     res.json({ text: message, response_type: 'in_channel' });
   } catch(e) {
