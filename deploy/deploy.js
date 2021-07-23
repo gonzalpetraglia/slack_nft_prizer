@@ -6,7 +6,7 @@ const deployFunc = async (hre) => {
   const deployResult = await deploy("Prizes", {
     from: deployer,
     gasLimit: 4000000,
-    args: ['Taller de programacion 2 - Prizes', 'TP2P'],
+    args: ['Taller 2 - Achievements', 'T2A'],
   });
   console.log(`Prizes deployed at ${deployResult.address}`);
   return hre.network.live; // prevents re execution on live networks

@@ -11,8 +11,7 @@ task("accounts", "Prints the list of accounts", async () => {
   }
 });
 config({ path: resolve(__dirname, "./.env") });
-console.log(process.env.MNEMONIC)
-console.log(process.env.INFURA_PROJECT_ID)
+
 module.exports = {
   solidity: "0.8.4",
   namedAccounts: {
